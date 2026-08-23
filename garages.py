@@ -1,113 +1,567 @@
-import sqlite3
-import discord
-from discord import app_commands
-
-DATABASE_PATH = "bus_game.db"
-
+GARAGES = {
+"A": {
+"name": "Sutton Garage",
+"location": "Sutton",
+"capacity": 86,
+"buy": 1_800_000,
+"rent": 34_000,
+},
+"AC": {
+"name": "Willesden Garage",
+"location": "Brent",
+"capacity": 100,
+"buy": 2_400_000,
+"rent": 44_000,
+},
+"AD": {
+"name": "Palmers Green Garage",
+"location": "Enfield",
+"capacity": 81,
+"buy": 1_700_000,
+"rent": 32_000,
+},
+"AF": {
+"name": "Putney Garage",
+"location": "Wandsworth",
+"capacity": 94,
+"buy": 2_600_000,
+"rent": 47_000,
+},
+"AH": {
+"name": "Brentford Garage",
+"location": "Hounslow",
+"capacity": 96,
+"buy": 2_100_000,
+"rent": 38_000,
+},
+"BC": {
+"name": "Beddington Garage",
+"location": "Croydon",
+"capacity": 128,
+"buy": 2_800_000,
+"rent": 51_000,
+},
+"BK": {
+"name": "Barking Garage",
+"location": "Barking and Dagenham",
+"capacity": 105,
+"buy": 2_300_000,
+"rent": 42_000,
+},
+"BN": {
+"name": "Brixton Garage",
+"location": "Lambeth",
+"capacity": 94,
+"buy": 2_600_000,
+"rent": 47_000,
+},
+"BT": {
+"name": "Edgware Garage",
+"location": "Barnet",
+"capacity": 83,
+"buy": 1_800_000,
+"rent": 33_000,
+},
+"BW": {
+"name": "Bow Garage",
+"location": "Tower Hamlets",
+"capacity": 95,
+"buy": 2_300_000,
+"rent": 41_000,
+},
+"BX": {
+"name": "Bexleyheath Garage",
+"location": "Bexley",
+"capacity": 113,
+"buy": 2_400_000,
+"rent": 45_000,
+},
+"C": {
+"name": "Croydon Garage",
+"location": "Croydon",
+"capacity": 117,
+"buy": 2_500_000,
+"rent": 47_000,
+},
+"CP": {
+"name": "Canons Park Garage",
+"location": "Harrow",
+"capacity": 29,
+"buy": 600_000,
+"rent": 12_000,
+},
+"CT": {
+"name": "Clapton Garage",
+"location": "Hackney",
+"capacity": 79,
+"buy": 2_200_000,
+"rent": 39_000,
+},
+"DT": {
+"name": "Dartford Garage",
+"location": "Dartford",
+"capacity": 60,
+"buy": 1_000_000,
+"rent": 19_000,
+},
+"DS": {
+"name": "Henley Road Garage",
+"location": "Redbridge",
+"capacity": 142,
+"buy": 3_100_000,
+"rent": 57_000,
+},
+"DX": {
+"name": "Barking (North Street) Garage",
+"location": "Barking and Dagenham",
+"capacity": 45,
+"buy": 1_000_000,
+"rent": 18_000,
+},
+"E": {
+"name": "Enfield Garage",
+"location": "Enfield",
+"capacity": 122,
+"buy": 2_600_000,
+"rent": 49_000,
+},
+"EC": {
+"name": "Edmonton Garage",
+"location": "Enfield",
+"capacity": 25,
+"buy": 500_000,
+"rent": 10_000,
+},
+"EW": {
+"name": "Edgware Garage (Approach Rd)",
+"location": "Barnet",
+"capacity": 79,
+"buy": 1_700_000,
+"rent": 32_000,
+},
+"FW": {
+"name": "Fulwell Garage",
+"location": "Richmond upon Thames",
+"capacity": 124,
+"buy": 2_700_000,
+"rent": 50_000,
+},
+"G": {
+"name": "Greenford Garage",
+"location": "Ealing",
+"capacity": 85,
+"buy": 2_000_000,
+"rent": 37_000,
+},
+"GM": {
+"name": "Goat Road Garage",
+"location": "Newham",
+"capacity": 26,
+"buy": 600_000,
+"rent": 11_000,
+},
+"GW": {
+"name": "Armstrong Way Garage",
+"location": "Ealing",
+"capacity": 129,
+"buy": 3_100_000,
+"rent": 56_000,
+},
+"HD": {
+"name": "Harrow Weald Garage",
+"location": "Harrow",
+"capacity": 79,
+"buy": 1_700_000,
+"rent": 32_000,
+},
+"HK": {
+"name": "Ash Grove Garage",
+"location": "Hackney",
+"capacity": 108,
+"buy": 3_000_000,
+"rent": 53_000,
+},
+"HT": {
+"name": "Holloway Garage",
+"location": "Islington",
+"capacity": 157,
+"buy": 4_300_000,
+"rent": 78_000,
+},
+"DH": {
+"name": "Dawley Road Garage",
+"location": "Hillingdon",
+"capacity": 46,
+"buy": 1_000_000,
+"rent": 18_000,
+},
+"LI": {
+"name": "Lea Interchange Garage",
+"location": "Waltham Forest",
+"capacity": 143,
+"buy": 3_100_000,
+"rent": 57_000,
+},
+"MB": {
+"name": "Orpington Garage",
+"location": "Bromley",
+"capacity": 104,
+"buy": 2_200_000,
+"rent": 42_000,
+},
+"MG": {
+"name": "Morden Wharf Garage",
+"location": "Greenwich",
+"capacity": 88,
+"buy": 2_100_000,
+"rent": 38_000,
+},
+"N": {
+"name": "Norwood Garage",
+"location": "Lambeth",
+"capacity": 132,
+"buy": 3_600_000,
+"rent": 65_000,
+},
+"NP": {
+"name": "Northumberland Park Garage",
+"location": "Haringey",
+"capacity": 180,
+"buy": 4_300_000,
+"rent": 78_000,
+},
+"NS": {
+"name": "Romford Garage",
+"location": "Havering",
+"capacity": 88,
+"buy": 1_900_000,
+"rent": 35_000,
+},
+"NX": {
+"name": "New Cross Garage",
+"location": "Lewisham",
+"capacity": 100,
+"buy": 2_400_000,
+"rent": 44_000,
+},
+"PA": {
+"name": "Perivale West Garage",
+"location": "Ealing",
+"capacity": 60,
+"buy": 1_400_000,
+"rent": 26_000,
+},
+"PB": {
+"name": "Potters Bar Garage",
+"location": "Hertsmere",
+"capacity": 50,
+"buy": 800_000,
+"rent": 16_000,
+},
+"PD": {
+"name": "Plumstead Garage",
+"location": "Greenwich",
+"capacity": 80,
+"buy": 1_900_000,
+"rent": 35_000,
+},
+"PF": {
+"name": "Purfleet Garage",
+"location": "Thurrock",
+"capacity": 100,
+"buy": 1_700_000,
+"rent": 32_000,
+},
+"PM": {
+"name": "Peckham Garage",
+"location": "Southwark",
+"capacity": 120,
+"buy": 3_300_000,
+"rent": 59_000,
+},
+"Q": {
+"name": "Camberwell Garage",
+"location": "Southwark",
+"capacity": 199,
+"buy": 5_500_000,
+"rent": 99_000,
+},
+"QB": {
+"name": "Battersea Garage",
+"location": "Wandsworth",
+"capacity": 182,
+"buy": 5_000_000,
+"rent": 90_000,
+},
+"RA": {
+"name": "Waterloo Garage",
+"location": "Lambeth",
+"capacity": 36,
+"buy": 1_000_000,
+"rent": 18_000,
+},
+"RM": {
+"name": "Rainham Garage",
+"location": "Havering",
+"capacity": 90,
+"buy": 1_900_000,
+"rent": 36_000,
+},
+"RP": {
+"name": "Park Royal Garage",
+"location": "Brent",
+"capacity": 37,
+"buy": 900_000,
+"rent": 16_000,
+},
+"RR": {
+"name": "River Road Garage",
+"location": "Barking and Dagenham",
+"capacity": 209,
+"buy": 4_500_000,
+"rent": 84_000,
+},
+"S": {
+"name": "Shepherd's Bush Garage",
+"location": "Hammersmith and Fulham",
+"capacity": 94,
+"buy": 2_600_000,
+"rent": 47_000,
+},
+"SF": {
+"name": "Stamford Hill Garage",
+"location": "Hackney",
+"capacity": 74,
+"buy": 2_000_000,
+"rent": 37_000,
+},
+"SI": {
+"name": "Silvertown Garage",
+"location": "Newham",
+"capacity": 120,
+"buy": 2_900_000,
+"rent": 52_000,
+},
+"SM": {
+"name": "Sydenham Garage",
+"location": "Lewisham",
+"capacity": 45,
+"buy": 1_100_000,
+"rent": 20_000,
+},
+"SO": {
+"name": "Harrow Garage",
+"location": "Harrow",
+"capacity": 80,
+"buy": 1_700_000,
+"rent": 32_000,
+},
+"SW": {
+"name": "Stockwell Garage",
+"location": "Lambeth",
+"capacity": 158,
+"buy": 4_300_000,
+"rent": 78_000,
+},
+"T": {
+"name": "Leyton Garage",
+"location": "Waltham Forest",
+"capacity": 94,
+"buy": 2_000_000,
+"rent": 38_000,
+},
+"TB": {
+"name": "Bromley Garage",
+"location": "Bromley",
+"capacity": 83,
+"buy": 1_800_000,
+"rent": 33_000,
+},
+"TC": {
+"name": "Croydon (TC) Garage",
+"location": "Croydon",
+"capacity": 103,
+"buy": 2_200_000,
+"rent": 41_000,
+},
+"TF": {
+"name": "Twickenham Garage",
+"location": "Richmond upon Thames",
+"capacity": 129,
+"buy": 2_800_000,
+"rent": 52_000,
+},
+"TH": {
+"name": "Thornton Heath Garage",
+"location": "Croydon",
+"capacity": 78,
+"buy": 1_700_000,
+"rent": 31_000,
+},
+"TK": {
+"name": "Therapia Lane Garage",
+"location": "Sutton",
+"capacity": 50,
+"buy": 1_100_000,
+"rent": 20_000,
+},
+"TL": {
+"name": "Catford Garage",
+"location": "Lewisham",
+"capacity": 130,
+"buy": 3_100_000,
+"rent": 57_000,
+},
+"TV": {
+"name": "Tolworth Garage",
+"location": "Kingston upon Thames",
+"capacity": 77,
+"buy": 1_700_000,
+"rent": 31_000,
+},
+"UX": {
+"name": "Uxbridge Garage",
+"location": "Hillingdon",
+"capacity": 96,
+"buy": 2_100_000,
+"rent": 38_000,
+},
+"V": {
+"name": "Stamford Brook Garage",
+"location": "Hounslow",
+"capacity": 76,
+"buy": 1_600_000,
+"rent": 30_000,
+},
+"W": {
+"name": "Cricklewood Garage",
+"location": "Barnet",
+"capacity": 110,
+"buy": 2_400_000,
+"rent": 44_000,
+},
+"WD": {
+"name": "Wandsworth Garage",
+"location": "Wandsworth",
+"capacity": 80,
+"buy": 2_200_000,
+"rent": 40_000,
+},
+"WJ": {
+"name": "Willesden Junction Garage",
+"location": "Brent",
+"capacity": 70,
+"buy": 1_700_000,
+"rent": 30_000,
+},
+"WK": {
+"name": "Hounslow Heath Garage",
+"location": "Hounslow",
+"capacity": 90,
+"buy": 1_900_000,
+"rent": 36_000,
+},
+"WL": {
+"name": "Walworth Garage",
+"location": "Southwark",
+"capacity": 151,
+"buy": 4_200_000,
+"rent": 75_000,
+},
+"WN": {
+"name": "Wood Green Garage",
+"location": "Haringey",
+"capacity": 100,
+"buy": 2_400_000,
+"rent": 44_000,
+},
+"WS": {
+"name": "Hayes Garage",
+"location": "Hillingdon",
+"capacity": 80,
+"buy": 1_700_000,
+"rent": 32_000,
+},
+"X": {
+"name": "Westbourne Park Garage",
+"location": "Westminster",
+"capacity": 110,
+"buy": 3_000_000,
+"rent": 54_000,
+},
+"GY": {
+"name": "Grays Garage",
+"location": "Essex",
+"capacity": 57,
+"buy": 1_000_000,
+"rent": 18_000,
+},
+"HF": {
+"name": "Hatfield Garage",
+"location": "Hertfordshire",
+"capacity": 27,
+"buy": 500_000,
+"rent": 9_000,
+},
+"HH": {
+"name": "Hemel Hempstead Garage",
+"location": "Hertfordshire",
+"capacity": 90,
+"buy": 1_500_000,
+"rent": 28_000,
+},
+"CY": {
+"name": "Crawley Garage",
+"location": "West Sussex",
+"capacity": 80,
+"buy": 1_400_000,
+"rent": 25_000,
+},
+"KB": {
+"name": "Kangley Bridge Road Garage",
+"location": "Kent",
+"capacity": 34,
+"buy": 600_000,
+"rent": 11_000,
+},
+}
 
 def setup_garages():
     conn = sqlite3.connect(DATABASE_PATH)
+    cursor = conn.cursor()
 
-    conn.execute("""
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS garages (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL UNIQUE,
+            code TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
             location TEXT NOT NULL,
             capacity INTEGER NOT NULL,
-            price INTEGER NOT NULL
+            buy_price INTEGER NOT NULL,
+            rent_price INTEGER NOT NULL,
+            owner_id INTEGER DEFAULT NULL,
+            rented_by INTEGER DEFAULT NULL
         )
     """)
 
+    for code, garage in GARAGES.items():
+        cursor.execute("""
+            INSERT OR IGNORE INTO garages (
+                code,
+                name,
+                location,
+                capacity,
+                buy_price,
+                rent_price
+            )
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (
+            code,
+            garage["name"],
+            garage["location"],
+            garage["capacity"],
+            garage["buy"],
+            garage["rent"]
+        ))
+
     conn.commit()
     conn.close()
-
-
-class GarageCommands(app_commands.Group):
-    def __init__(self):
-        super().__init__(
-            name="garage",
-            description="Manage garages"
-        )
-
-    @app_commands.command(name="add", description="Add a garage to the market")
-    @app_commands.describe(
-        name="Garage name",
-        location="Garage location",
-        capacity="Maximum number of buses",
-        price="Purchase price"
-    )
-    async def add_garage(
-        self,
-        interaction: discord.Interaction,
-        name: str,
-        location: str,
-        capacity: int,
-        price: int
-    ):
-        if not interaction.user.guild_permissions.administrator:
-            await interaction.response.send_message(
-                "❌ You do not have permission to add garages.",
-                ephemeral=True
-            )
-            return
-
-        conn = sqlite3.connect(DATABASE_PATH)
-
-        try:
-            conn.execute(
-                """
-                INSERT INTO garages (name, location, capacity, price)
-                VALUES (?, ?, ?, ?)
-                """,
-                (name, location, capacity, price)
-            )
-
-            conn.commit()
-
-            await interaction.response.send_message(
-                f"🏢 **{name}** added to the garage market!\n"
-                f"📍 **Location:** {location}\n"
-                f"🚌 **Capacity:** {capacity}\n"
-                f"💰 **Price:** £{price:,}"
-            )
-
-        except sqlite3.IntegrityError:
-            await interaction.response.send_message(
-                "❌ A garage with that name already exists.",
-                ephemeral=True
-            )
-
-        finally:
-            conn.close()
-
-    @app_commands.command(name="list", description="View available garages")
-    async def list_garages(self, interaction: discord.Interaction):
-        conn = sqlite3.connect(DATABASE_PATH)
-        cursor = conn.cursor()
-
-        cursor.execute("""
-            SELECT name, location, capacity, price
-            FROM garages
-            ORDER BY price ASC
-        """)
-
-        garages = cursor.fetchall()
-        conn.close()
-
-        if not garages:
-            await interaction.response.send_message(
-                "🏢 There are currently no garages available."
-            )
-            return
-
-        text = "## 🏢 Available Garages\n\n"
-
-        for name, location, capacity, price in garages:
-            text += (
-                f"**{name}**\n"
-                f"📍 {location}\n"
-                f"🚌 Capacity: {capacity}\n"
-                f"💰 £{price:,}\n\n"
-            )
-
-        await interaction.response.send_message(text)
